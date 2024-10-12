@@ -1,17 +1,16 @@
-### **Report: Implementing Two SOLID Principles in Python**
+### Implementation Report: Two SOLID Principles in Python
 
 **Author**: Ernu Catalina FAF-223
 
 ### **Objectives:**
-The goal of this lab is to implement two principles from the SOLID framework in a simple project. For this exercise, we will focus on the **Single Responsibility Principle (SRP)** and the **Open/Closed Principle (OCP)**. By doing so, we will gain practical experience in structuring classes that adhere to these principles and understand the benefits of doing so.
+The aim of this lab is to implement two principles from the SOLID framework in a simple project. I focused on the **Single Responsibility Principle (SRP)** and the **Open/Closed Principle (OCP)** to get hands-on experience in structuring classes according to these principles and to demonstrate the benefits.
 
 ### **Implemented SOLID Principles**
 
 #### **1. Single Responsibility Principle (SRP)**
-The **Single Responsibility Principle (SRP)** says that a class should have only one responsibility, meaning it should have only one reason to change. A class that adheres to SRP should focus on a single task and delegate other concerns (such as logging, UI updates, etc.) to other classes.
+The Single Responsibility Principle (SRP) says that a class should have only one reason to change. For example, a class should only handle one responsibility, while other responsibilities, like logging or UI updates, should be managed by other classes.
 
-
-For our example, we have two classes: one for managing the `User` data and another class for handling logging. The `User` class is only responsible for user-related tasks, and the `Logger` class manages the logging, adhering to SRP.
+In my project, I used two classes: one for handling user data and another for managing logs. The `User` class focuses only on user-related tasks, while the `Logger` class is responsible for logging.
 
 ```python
 class User:
@@ -20,9 +19,7 @@ class User:
         self.age = age
 
     def save(self):
-        # Save user to the database
         print(f"Saving user: {self.name}, {self.age}")
-
 
 class Logger:
     @staticmethod
@@ -37,18 +34,15 @@ user.save()
 Logger.log(f"{user.name} was saved to the database.")
 ```
 
-**Explanation**:
-- The `User` class is responsible solely for user-related tasks, such as saving the user.
-- The `Logger` class is responsible for logging messages.
 
-This separation follows SRP and keeps the classes focused on a single task.
+The `User` class is responsible only for saving the user, while logging is delegated to the `Logger` class. This ensures that each class handles a single task, following SRP.
 
 ---
 
 #### **2. Open/Closed Principle (OCP)**
-The **Open/Closed Principle (OCP)** states that software entities (such as classes, modules, and functions) should be **open for extension but closed for modification**. This means that we should be able to add new functionality without changing the existing code.
+The Open/Closed Principle (OCP) states that software should be open for extension but closed for modification. This means we can add new functionality without changing existing code.
 
-The `Discount` class is closed for modification, but open for extension. We can extend the discount system by adding new discount strategies through separate classes.
+In this case, I didn’t need to modify the `Discount` class to introduce new discount types. Instead, I created new strategies in separate classes.
 
 ```python
 class Discount:
@@ -58,16 +52,13 @@ class Discount:
     def apply_discount(self, discount_strategy):
         return discount_strategy.calculate_discount(self.price)
 
-
 class PercentageDiscount:
     def calculate_discount(self, price):
         return price * 0.9  # 10% off
 
-
 class FixedDiscount:
     def calculate_discount(self, price):
         return price - 10  # $10 off
-
 
 # Usage
 price = 100
@@ -80,16 +71,14 @@ print(f"Price after percentage discount: {discount.apply_discount(percentage_dis
 print(f"Price after fixed discount: {discount.apply_discount(fixed_discount)}")
 ```
 
-**Explanation**:
-- The `Discount` class now takes a **strategy** object for applying discounts, which means the logic for each discount type is handled by different classes (e.g., `PercentageDiscount`, `FixedDiscount`).
-- We can add new discount types by creating new strategy classes, without modifying the existing `Discount` class, thus following the OCP.
+The `Discount` class now takes a strategy object for applying different types of discounts. I can add new discount strategies without changing the `Discount` class itself, which follows OCP.
 
 ---
 
 ### **Conclusion**
-In this project, we applied two of the five SOLID principles:
+In this project, I applied two SOLID principles:
 
-1. **Single Responsibility Principle (SRP)**: We refactored the `User` class by separating the logging functionality into a different class, ensuring that each class had only one responsibility.
-2. **Open/Closed Principle (OCP)**: We refactored the `Discount` class so that new discount types could be added via extension (new strategy classes) without modifying the existing class, ensuring compliance with OCP.
+- **SRP (Single Responsibility Principle):** I separated the `User` and `Logger` classes so that each one handles only one responsibility.
+- **Open/Closed Principle (OCP):** I refactored the `Discount` class to allow new discount strategies to be added without modifying the original class.
 
-By adhering to these principles, our code becomes more maintainable, easier to extend, and less prone to errors, especially when scaling up or adding new features.
+By following these principles, my code is easier to maintain, extend, and scale while minimizing the risk of introducing bugs when adding new features.
