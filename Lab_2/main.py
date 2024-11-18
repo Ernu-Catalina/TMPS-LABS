@@ -1,19 +1,31 @@
+from composite_order import BookItem, BookBundle
+from decorator import Discount, GiftWrap
 from book import Book
-from new_book import NewBook
-from order_builder import OrderBuilder
+from book_facade import BookFacade
 
-original_book = Book("Alice in Wonderland", "Lewis Carroll", 29.99)
-book_copy = original_book.copy()
-book_copy.price = 24.99
-print("Original Book:", original_book.get_info())
-print("Copied Book:", book_copy.get_info())
+book = Book("1984", "George Orwell", 19.99)
 
-new_book = NewBook.create_book("The Great Gatsby", "F. Scott Fitzgerald", 34.99)
-print("New Book:", new_book.get_info())
+book_facade = BookFacade(book)
+book_details = book_facade.get_book_details()
 
-order = (OrderBuilder()
-         .set_customer("Jane Doe")
-         .add_item(original_book)
-         .add_item(new_book)
-         .build())
-print(order)
+print(book_details)
+
+book1 = Book("1984", "George Orwell", 15.99)
+book2 = Book("Brave New World", "Aldous Huxley", 18.99)
+
+
+item1 = BookItem(book1)
+item2 = BookItem(book2)
+
+bundle = BookBundle()
+bundle.add_item(item1)
+bundle.add_item(item2)
+
+print("Total Price:", bundle.get_price())
+print("Book Info:", bundle.get_info())
+
+discounted_bundle = Discount(bundle, 0.1)
+wrapped_bundle = GiftWrap(discounted_bundle)
+
+print("Discounted Bundle Price:", wrapped_bundle.get_price())
+print("Bundle Info:", wrapped_bundle.get_info())
