@@ -7,106 +7,146 @@
 2. As a continuation of the previous laboratory work, think about the functionalities that your system will need to provide to the user.
 3. Implement some additional functionalities using structural design patterns.
 
-## Used Design Patterns
-- **Prototype Pattern**: This pattern is used to create a new object by copying an existing object, which simplifies object creation when many similar objects are required.
-  
-- **Factory Method Pattern**: This pattern defines an interface for creating an object but allows subclasses to alter the type of objects that will be created, promoting loose coupling.
+## Used Structural Design Patterns
+- **Composite Pattern**: This pattern is used to compose objects into tree-like structures to represent part-whole hierarchies. It allows clients to treat individual objects and compositions of objects uniformly.
 
-- **Builder Pattern**: This pattern allows for step-by-step construction of a complex object, providing better control over the construction process and allowing for variations in the product being built.
+- **Decorator Pattern**: This pattern is used to add new functionality to an object dynamically. It allows behavior to be added to an individual object without affecting the behavior of other objects from the same class.
+
+- **Flyweight Pattern**: This pattern is used to reduce the number of objects created by sharing common objects. It helps in optimizing memory usage when multiple identical objects are created.
 
 ## Implementation
 
-### Prototype Pattern Implementation
+### Composite Pattern Implementation
 
-**File: `book.py`**
+**File: `composite_order.py`**
 ```python
-class Book:
-    def __init__(self, title, author, price):
-        self.title = title
-        self.author = author
-        self.price = price
+class OrderBase:
+    def get_price(self):
+        return 0
 
     def get_info(self):
-        return f"{self.title} by {self.author}, Price: ${self.price}"
+        return "No info available"
 
-    def copy(self):
-        return Book(self.title, self.author, self.price)
+
+class BookItem(OrderBase):
+    def __init__(self, book):
+        self.book = book
+
+    def get_price(self):
+        return self.book.price
+
+    def get_info(self):
+        return self.book.get_info()
+
+
+class BookBundle:
+    def __init__(self):
+        self.items = []
+
+    def add_item(self, item):
+        self.items.append(item)
+
+    def get_price(self):
+        return sum(item.get_price() for item in self.items)
+
+    def get_info(self):
+        return "Bundle:\n" + "\n".join(item.get_info() for item in self.items)
 ```
 **Explanation:**  
-The `Book` class represents a book in the bookstore. It includes attributes like title, author, and price. The `copy` method allows for creating a new instance of a book with the same attributes, implementing the Prototype pattern.
+The `OrderBase` class represents the basic interface with `get_price` and `get_info` methods. The `BookItem` class represents a single book item, while the `BookBundle` class groups multiple items together into a bundle. This design allows combining individual `BookItem` objects into larger structures like `BookBundle` while keeping a uniform interface for calculating prices and retrieving information.
 
-### Factory Method Pattern Implementation
+### Decorator Pattern Implementation
 
-**File: `new_book.py`**
+**File: `decorator.py`**
+```python
+class Order:
+    def __init__(self, order):
+        self.order = order
+
+    def get_price(self):
+        return self.order.get_price()
+
+    def get_info(self):
+        return self.order.get_info()
+
+
+class Discount(Order):
+    def __init__(self, order, discount):
+        super().__init__(order)
+        self.discount = discount
+
+    def get_price(self):
+        return round(self.order.get_price() * (1 - self.discount), 2)
+
+
+class GiftWrap(Order):
+    def __init__(self, order, gift_wrap_fee=1):
+        super().__init__(order)
+        self.gift_wrap_fee = gift_wrap_fee
+
+    def get_price(self):
+        return self.order.get_price() + self.gift_wrap_fee
+
+    def get_info(self):
+        return f"{self.order.get_info()} (Gift Wrapped)"
+```
+**Explanation:**  
+The `Order` class serves as a base for the decorator classes. `Discount` and `GiftWrap` are decorators that modify the behavior of an existing order. `Discount` applies a discount to the price, while `GiftWrap` adds a gift wrap fee to the price. Both decorators extend the `Order` class, allowing them to be applied dynamically to orders.
+
+### Flyweight Pattern Implementation
+
+**File: `flyweight.py`**
 ```python
 from book import Book
 
+class BookFactory:
+    def __init__(self):
+        self.books = {}
 
-class NewBook:
-    def create_book(title, author, price):
-        return Book(title, author, price)
+    def get_book(self, title, author, price):
+        key = (title, author)
+        if key not in self.books:
+            self.books[key] = Book(title, author, price)
+        return self.books[key]
 ```
 **Explanation:**  
-The `NewBook` class has a static method called `create_book` that creates new `Book` objects. This method makes it easier to adjust the book creation process in the future if needed.
-### Builder Pattern Implementation
-
-**File: `new_order.py`**
-```python
-class Order:
-    def __init__(self):
-        self.items = []
-        self.customer = None
-
-    def __str__(self):
-        items_str = ', '.join(item.get_info() for item in self.items)
-        return f"Order for {self.customer}: {items_str}"
-
-
-class NewOrder:
-    def __init__(self):
-        self.order = Order()
-
-    def set_customer(self, customer_name):
-        self.order.customer = customer_name
-        return self
-
-    def add_item(self, book):
-        self.order.items.append(book)
-        return self
-
-    def build(self):
-        return self.order
-```
-**Explanation:**  
-The `Order` class represents a customer's order, including a list of books and the customer's name. The `NewOrder` class allows you to easily set the customer and add books to the order, and then returns the fully created `Order` object.
+The `BookFactory` is a Flyweight class that manages the creation of `Book` objects. It stores a cache of already created books and reuses existing ones if a book with the same title and author is requested. This optimizes memory usage, as books with the same attributes are shared rather than creating new instances.
 
 ## Execution
 
 **File: `main.py`**
 ```python
 from book import Book
-from new_book import NewBook
-from new_order import NewOrder
+from composite_order import BookItem, BookBundle
+from decorator import Discount, GiftWrap
+from flyweight import BookFactory
 
-original_book = Book("Alice in Wonderland", "Lewis Carol", 29.99)
-book_copy = original_book.copy()
-book_copy.price = 24.99
-print("Original Book:", original_book.get_info())
-print("Copied Book:", book_copy.get_info())
+book_factory = BookFactory()
 
-new_book = NewBook.create_book("The Great Gatsby", "F. Scott Fitzgerald", 34.99)
-print("New Book:", new_book.get_info())
+book1 = book_factory.get_book("1984", "George Orwell", 19.99)
+book2 = book_factory.get_book("Brave New World", "Aldous Huxley", 18.99)
+book3 = book_factory.get_book("To Kill a Mockingbird", "Harper Lee", 14.99)
 
-order = (NewOrder()
-         .set_customer("Jane Doe")
-         .add_item(original_book)
-         .add_item(new_book)
-         .build())
-print(order)
+item1 = BookItem(book1)
+item2 = BookItem(book2)
+item3 = BookItem(book3)
+
+bundle = BookBundle()
+bundle.add_item(item1)
+bundle.add_item(item2)
+bundle.add_item(item3)
+
+print(bundle.get_info())
+print("Bundle Price:", bundle.get_price())
+
+discounted_bundle = Discount(bundle, 0.2)
+wrapped_bundle = GiftWrap(discounted_bundle, gift_wrap_fee=2)
+
+print("Discounted Bundle Price:", discounted_bundle.get_price())
+print("Gift Wrapped Discounted Bundle Price:", wrapped_bundle.get_price())
 ```
 **Explanation:**  
-
-The main file shows how all three design patterns are used. It clones a book with the Prototype pattern, creates a new book using the Factory Method, and builds an order with the Builder pattern. The output displays the details of the books and the completed order.
+In `main.py`, the Flyweight pattern is used to create shared `Book` instances. The Composite pattern is used to create a book bundle, and the Decorator pattern is applied to the bundle to add discounts and gift wrap. This demonstrates how these patterns work together to manage the creation, modification, and pricing of a bookstore order.
 
 ## Conclusions
-In this project, I implemented three creational design patterns in the context of a bookstore domain. The Prototype pattern helps create a copy of book instances, the Factory Method simplifies the creation of new book objects, and the Builder pattern offers a structured way to build customer orders. These design patterns significantly improve the flexibility and maintainability of the code, demonstrating their effectiveness in real-world applications.
+In this project, I implemented multiple structural design patterns in the context of a bookstore system. The **Composite Pattern** allowed me to manage both individual books and book bundles with a unified interface. The **Decorator Pattern** provided flexibility in applying additional features like discounts and gift wrapping to orders. Finally, the **Flyweight Pattern** optimized memory usage by reusing book instances with identical attributes. These design patterns helped make the system more modular, maintainable, and efficient, showcasing their effectiveness in real-world applications.

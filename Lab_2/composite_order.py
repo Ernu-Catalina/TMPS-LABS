@@ -17,7 +17,7 @@ class BookItem(OrderBase):
         return self.book.get_info()
 
 
-class BookBundle(OrderBase):
+class BookBundle:
     def __init__(self):
         self.items = []
 
@@ -28,4 +28,4 @@ class BookBundle(OrderBase):
         return sum(item.get_price() for item in self.items)
 
     def get_info(self):
-        return "Bundle: " + ", ".join(item.get_info() for item in self.items)
+        return "Bundle:\n" + "\n".join(item.get_info() for item in self.items)

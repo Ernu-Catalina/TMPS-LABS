@@ -5,4 +5,4 @@ class Book:
         self.price = price
 
     def get_info(self):
-        return f"Book: {self.title} by {self.author}, Price: ${self.price}"
+        return f"Book: {self.title} by {self.author}, Price: {self.price}"
