@@ -17,6 +17,10 @@ bundle.add_item(item1)
 bundle.add_item(item2)
 bundle.add_item(item3)
 
+for item in bundle:
+    print(item.get_info())
+
+
 print(bundle.get_info())
 print("Bundle Price:", bundle.get_price())
 
